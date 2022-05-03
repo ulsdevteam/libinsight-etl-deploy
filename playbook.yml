@@ -1,0 +1,66 @@
+---
+
+- name: Deploy LibInsight Instruction & Outreach ETL
+  hosts: uda4
+  remote_user: ulsprovision
+  vars:
+    app_folder: /var/opt/libinsight-instruction-outreach-etl
+    user: libappsetl
+
+  tasks:
+    - name: Grab env vars from env_vars.yml
+      include_vars:
+        file: env_vars.yml
+        name: env_vars
+
+    - name: Create dedicated user
+      user:
+        name: '{{ user }}'
+        state: present
+      become: yes
+
+    - name: Create app folder with group permissions
+      file:
+        path: '{{ app_folder }}'
+        state: directory
+        recurse: yes
+        group: ulssysdev
+        owner: '{{ user }}'
+        mode: '02770'
+      become: yes
+
+    - name: Download executable from github
+      get_url:
+        url: https://github.com/ulsdevteam/libinsight-instruction-outreach-etl/releases/download/release-1.0.0/libinsight-instruction-outreach-etl
+        dest: '{{ app_folder }}/libinsight-instruction-outreach-etl'
+        owner: '{{ user }}'
+        mode: '0770'
+      become: yes
+
+    - name: Set environment variables
+      lineinfile:
+        dest: '/home/{{ user }}/.profile'
+        state: present
+        create: yes
+        owner: '{{ user }}'
+        regexp: '^export {{ item.key }}='
+        line: 'export {{ item.key }}={{ item.value }}'
+      with_items: '{{ env_vars | dict2items }}'
+      become: yes
+
+    - name: Schedule cron job
+      cron:
+        name: 'run libinsight-instruction-outreach-etl'
+        hour: '4'
+        minute: '0'
+        day: '2'
+        job: "/usr/local/bin/cronic sh -c 'source ~/.profile; {{ app_folder }}/libinsight-instruction-outreach-etl'"
+      become: yes
+      become_user: '{{ user }}'
+
+    - name: Send mail to root
+      lineinfile:
+        dest: /etc/aliases
+        regexp: '^{{ user }}:'
+        line: '{{ user }}:    root'
+      become: yes
