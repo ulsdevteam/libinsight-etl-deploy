@@ -44,7 +44,7 @@
         create: yes
         owner: '{{ user }}'
         regexp: '^export {{ item.key }}='
-        line: 'export {{ item.key }}={{ item.value }}'
+        line: 'export {{ item.key }}="{{ item.value }}"'
       with_items: '{{ env_vars | dict2items }}'
       become: yes
 
@@ -53,7 +53,7 @@
         name: 'run libinsight-instruction-outreach-etl'
         hour: '4'
         minute: '0'
-        day: '2'
+        day: '1'
         job: "/usr/local/bin/cronic sh -c 'source ~/.profile; {{ app_folder }}/libinsight-instruction-outreach-etl'"
       become: yes
       become_user: '{{ user }}'
