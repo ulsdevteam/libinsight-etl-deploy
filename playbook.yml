@@ -31,7 +31,7 @@
 
     - name: Download executable from github
       get_url:
-        url: https://github.com/ulsdevteam/libinsight-instruction-outreach-etl/releases/download/release-1.0.0/libinsight-instruction-outreach-etl
+        url: https://github.com/ulsdevteam/libinsight-instruction-outreach-etl/releases/download/release-1.1.0/libinsight-instruction-outreach-etl
         dest: '{{ app_folder }}/libinsight-instruction-outreach-etl'
         owner: '{{ user }}'
         mode: '0770'
