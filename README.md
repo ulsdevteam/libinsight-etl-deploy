@@ -1,1 +1,1 @@
-## LibInsight Instruction and Outreach ETL deployment script
+## LibInsight ETL deployment script

@@ -1,10 +1,10 @@
 ---
 
-- name: Deploy LibInsight Instruction & Outreach ETL
+- name: Deploy LibInsight ETL
   hosts: uda4
   remote_user: ulsprovision
   vars:
-    app_folder: /var/opt/libinsight-instruction-outreach-etl
+    app_folder: /var/opt/libinsight-etl
     user: libappsetl
 
   tasks:
@@ -31,8 +31,8 @@
 
     - name: Download executable from github
       get_url:
-        url: https://github.com/ulsdevteam/libinsight-instruction-outreach-etl/releases/download/release-1.1.0/libinsight-instruction-outreach-etl
-        dest: '{{ app_folder }}/libinsight-instruction-outreach-etl'
+        url: https://github.com/ulsdevteam/libinsight-etl/releases/download/release-2.0.0/libinsight-etl
+        dest: '{{ app_folder }}/libinsight-etl'
         owner: '{{ user }}'
         mode: '0770'
       become: yes
@@ -48,13 +48,22 @@
       with_items: '{{ env_vars | dict2items }}'
       become: yes
 
-    - name: Schedule cron job
+    - name: Schedule cron job for Instruction and Outreach dataset
       cron:
-        name: 'run libinsight-instruction-outreach-etl'
+        name: 'run libinsight-etl for Instruction & Outreach'
         hour: '4'
         minute: '0'
         day: '1'
-        job: "/usr/local/bin/cronic sh -c 'source ~/.profile; {{ app_folder }}/libinsight-instruction-outreach-etl'"
+        job: "/usr/local/bin/cronic sh -c 'source ~/.profile; {{ app_folder }}/libinsight-etl instructionoutreach'"
+      become: yes
+      become_user: '{{ user }}'
+
+    - name: Schedule cron job for Head Counts dataset
+      cron:
+        name: 'run libinsight-etl for Hillman Head Counts'
+        hour: '4'
+        minute: '0'
+        job: "/usr/local/bin/cronic sh -c 'source ~/.profile; {{ app_folder }}/libinsight-etl hillheadcounts'"
       become: yes
       become_user: '{{ user }}'
 
